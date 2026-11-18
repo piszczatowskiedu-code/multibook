@@ -2,6 +2,8 @@
 // @name         MultiKsięgarnia - Panel produktów
 // @namespace    http://tampermonkey.net/
 // @version         4.11.10
+// @downloadURL  https://github.com/piszczatowskiedu-code/multibook/raw/refs/heads/main/multibook.user.js
+// @updateURL    https://github.com/piszczatowskiedu-code/multibook/raw/refs/heads/main/multibook.user.js
 // @description  Panel boczny + fiszka + sync + edycja + okładka + filtr + podgląd okładki. Obsługa: TaniaKsiążka, Platon, Bonito, Tantis, Świat Książki, Dressler, Empik, Ateneum
 // @author       You
 // @match        https://www.taniaksiazka.pl/*
