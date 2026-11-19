@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MultiKsięgarnia - Panel produktów
 // @namespace    http://tampermonkey.net/
-// @version         4.11.11
+// @version         4.11.12
 // @downloadURL  https://github.com/piszczatowskiedu-code/multibook/raw/refs/heads/main/multibook.user.js
 // @updateURL    https://github.com/piszczatowskiedu-code/multibook/raw/refs/heads/main/multibook.user.js
 // @description  Panel boczny + fiszka + sync + edycja + okładka + filtr + podgląd okładki. Obsługa: TaniaKsiążka, Platon, Bonito, Tantis, Świat Książki, Dressler, Empik, Ateneum
@@ -1841,11 +1841,48 @@
             if (og && og.content) cover = og.content;
         }
         let bruttoNum = null;
-        if (json.offers) {
-            const off = Array.isArray(json.offers) ? json.offers[0] : json.offers;
+        
+        // 1. Bonito – preferuj cenę okładkową widoczną na stronie
+        const priceBox = document.querySelector('.price_box');
+        
+        if (priceBox) {
+            const priceLabel = Array.from(priceBox.querySelectorAll('*'))
+                .find(el =>
+                    el.children.length === 0 &&
+                    /Cena\s+okładkowa\s*:/i.test(el.textContent)
+                );
+        
+            if (priceLabel) {
+                const match = priceLabel.textContent.match(
+                    /Cena\s+okładkowa\s*:\s*([\d\s]+[,.]\d{2})/i
+                );
+        
+                if (match) {
+                    const price = parseFloat(
+                        match[1].replace(/\s/g, '').replace(',', '.')
+                    );
+        
+                    if (Number.isFinite(price) && price > 0) {
+                        bruttoNum = price;
+                    }
+                }
+            }
+        }
+        
+        // 2. Awaryjnie – cena z JSON-LD, jeśli brak ceny okładkowej
+        if (bruttoNum === null && json.offers) {
+            const off = Array.isArray(json.offers)
+                ? json.offers[0]
+                : json.offers;
+        
             if (off && off.price != null) {
-                const price = parseFloat(String(off.price).replace(',', '.'));
-                if (!isNaN(price)) bruttoNum = price;
+                const price = parseFloat(
+                    String(off.price).replace(',', '.')
+                );
+        
+                if (Number.isFinite(price) && price > 0) {
+                    bruttoNum = price;
+                }
             }
         }
         const { cenaBrutto, cenaNetto, vat } = resolvePriceAndVat(bruttoNum, {
